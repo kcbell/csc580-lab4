@@ -20,7 +20,6 @@ class ExistsStmt:
                              if (self.stmt == True and a) or
                                 (self.stmt == False and not a) or
                                 (hasattr(self.stmt, 'test') and self.stmt.test(assignment) == a)])
-            print count, assignment
             return count
         switch = {
           ExistsStmt.GT: lambda n: count(assignment) > n,
