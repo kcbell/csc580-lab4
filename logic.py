@@ -9,17 +9,23 @@ Created on Nov 12, 2012
 class ExistsStmt:
     GT, LT, GTE, LTE, EQ = range(5)
     
-    def __init__(self, op, num, stmt = True):
+    def __init__(self, op, num, stmt = True, entities = None):
         self.op = op
         self.n = num
         self.stmt = stmt
+        self.ents = entities
         
     def test(self, assignment):
         def count(assn):
-            count = len([a for a in assn 
-                             if (self.stmt == True and a) or
-                                (self.stmt == False and not a) or
-                                (hasattr(self.stmt, 'test') and self.stmt.test(assignment) == a)])
+            count = 0
+            entities = assn if self.ents == None else [assn[i] for i in self.ents] 
+            for a in entities:
+                if ((self.stmt == True and a) or
+                    (self.stmt == False and not a) or
+                    (hasattr(self.stmt, 'test') and self.stmt.test(assignment) == a)
+                    ):
+                        count += 1
+            print assn, count
             return count
         switch = {
           ExistsStmt.GT: lambda n: count(assignment) > n,
@@ -93,7 +99,7 @@ def findSolutions(entityList, statementDict):
 
 def main():
     entities = ['Alice', 'Bob', 'Chad']
-    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1, KnightStmt(0)),
+    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1, KnightStmt(0), [0, 1, 2]),
              1 : UnaryStmt(UnaryStmt.NOT, KnightStmt(2)),
              2 : BinaryStmt(KnightStmt(0), 
                             BinaryStmt.AND,
