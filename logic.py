@@ -25,7 +25,6 @@ class ExistsStmt:
                     (hasattr(self.stmt, 'test') and self.stmt.test(assignment) == a)
                     ):
                         count += 1
-            print assn, count
             return count
         switch = {
           ExistsStmt.GT: lambda n: count(assignment) > n,
