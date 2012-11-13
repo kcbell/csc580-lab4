@@ -6,27 +6,20 @@ Created on Nov 12, 2012
 @author: Karl
 '''
 
-# for ExistsStmt only
-class KnightStmt:
-    def test(self, assignment):
-        return True
-
-# for ExistsStmt only    
-class KnaveStmt:    
-    def test(self, assignment):
-        return False
-
 class ExistsStmt:
     GT, LT, GTE, LTE, EQ = range(5)
     
-    def __init__(self, op, num, stmt = KnightStmt()):
+    def __init__(self, op, num, stmt = True):
         self.op = op
         self.n = num
         self.stmt = stmt
         
     def test(self, assignment):
         def count(assn):
-            count = len([a for a in assn if (a and self.stmt.test(assignment))])
+            count = len([a for a in assn 
+                             if (self.stmt == True and a) or
+                                (self.stmt == False and not a) or
+                                (hasattr(self.stmt, 'test') and self.stmt.test(assignment) == a)])
             print count, assignment
             return count
         switch = {
@@ -69,7 +62,7 @@ class UnaryStmt:
         }
         return switch[self.op](self.s)
     
-class ReferenceStmt:
+class KnightStmt:
     def __init__(self, index):
         self.i = index
     
@@ -101,11 +94,11 @@ def findSolutions(entityList, statementDict):
 
 def main():
     entities = ['Alice', 'Bob', 'Chad']
-    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1),
-             1 : UnaryStmt(UnaryStmt.NOT, ReferenceStmt(0)),
-             2 : BinaryStmt(ReferenceStmt(0), 
+    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1, KnightStmt(0)),
+             1 : UnaryStmt(UnaryStmt.NOT, KnightStmt(2)),
+             2 : BinaryStmt(KnightStmt(0), 
                             BinaryStmt.AND,
-                            ReferenceStmt(1))}
+                            KnightStmt(1))}
     solns = findSolutions(entities, stmts)
     if len(solns) == 0:
         print 'No solution found.'
