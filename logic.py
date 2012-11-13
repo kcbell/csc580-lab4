@@ -1,10 +1,42 @@
 '''
+Solves some logic puzzle given in formal terms of Knights and Knaves
+
 Created on Nov 12, 2012
 
 @author: Karl
 '''
 
-LIST = ['A', 'B']
+# for ExistsStmt only
+class KnightStmt:
+    def test(self, assignment):
+        return True
+
+# for ExistsStmt only    
+class KnaveStmt:    
+    def test(self, assignment):
+        return False
+
+class ExistsStmt:
+    GT, LT, GTE, LTE, EQ = range(5)
+    
+    def __init__(self, op, num, stmt = KnightStmt()):
+        self.op = op
+        self.n = num
+        self.stmt = stmt
+        
+    def test(self, assignment):
+        def count(assn):
+            count = len([a for a in assn if (a and self.stmt.test(assignment))])
+            print count, assignment
+            return count
+        switch = {
+          ExistsStmt.GT: lambda n: count(assignment) > n,
+          ExistsStmt.LT: lambda n: count(assignment) < n,
+          ExistsStmt.GTE: lambda n: count(assignment) >= n,
+          ExistsStmt.LTE: lambda n: count(assignment) <= n,
+          ExistsStmt.EQ: lambda n: count(assignment) == n
+        }
+        return switch[self.op](self.n)
 
 class BinaryStmt:
     AND, OR, IF, EQ, XOR = range(5)
@@ -16,16 +48,16 @@ class BinaryStmt:
     
     def test(self, assignment):
         switch = {
-          self.AND: lambda x, y: x.test(assignment) and y.test(assignment),
-          self.OR: lambda x, y: x.test(assignment) or y.test(assignment),
-          self.IF: lambda x, y: y.test(assignment) if x.test(assignment) else True,
-          self.EQ: lambda x, y: x.test(assignment) == y.test(assignment),
-          self.XOR: lambda x, y: x.test(assignment) != y.test(assignment)
+          BinaryStmt.AND: lambda x, y: x.test(assignment) and y.test(assignment),
+          BinaryStmt.OR: lambda x, y: x.test(assignment) or y.test(assignment),
+          BinaryStmt.IF: lambda x, y: y.test(assignment) if x.test(assignment) else True,
+          BinaryStmt.EQ: lambda x, y: x.test(assignment) == y.test(assignment),
+          BinaryStmt.XOR: lambda x, y: x.test(assignment) != y.test(assignment)
         }
         return switch[self.op](self.l, self.r)
 
 class UnaryStmt:
-    NOT = range(1)
+    NOT, = range(1)
     
     def __init__(self, op, stmt):
         self.op = op
@@ -33,7 +65,7 @@ class UnaryStmt:
         
     def test(self, assignment):
         switch = {
-          self.NOT: lambda x: not x.test(assignment)
+          UnaryStmt.NOT: lambda x: not x.test(assignment)
         }
         return switch[self.op](self.s)
     
@@ -43,22 +75,45 @@ class ReferenceStmt:
     
     def test(self, assignment):
         return assignment[self.i]
+    
+def generateAssignments(num):
+    if num == 1:
+        return [[True], [False]]
+    else:
+        assns = generateAssignments(num - 1)
+        newAssns = []
+        for assn in assns:
+            newAssns.append(assn + [True])
+            newAssns.append(assn + [False])
+        return newAssns
 
-def findSolution(self, entityList, statementDict):
-    pass
+# Brute force!
+def findSolutions(entityList, statementDict):
+    assns = generateAssignments(len(entityList))
+    solns = []
+    for assn in assns:
+        sat = True
+        for k, v in statementDict.items():
+            sat = sat and (assn[k] == v.test(assn))
+        if sat:
+            solns.append(assn)
+    return solns
 
 def main():
-    entities = ['A', 'B']
-    stmts = {'A' : UnaryStmt(UnaryStmt.NOT, 'B'),
-             'B' : BinaryStmt('A', BinaryStmt.AND, 'B')}
-    soln = findSolution(entities, stmts)
-    if soln == None:
+    entities = ['Alice', 'Bob', 'Chad']
+    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1),
+             1 : UnaryStmt(UnaryStmt.NOT, ReferenceStmt(0)),
+             2 : BinaryStmt(ReferenceStmt(0), 
+                            BinaryStmt.AND,
+                            ReferenceStmt(1))}
+    solns = findSolutions(entities, stmts)
+    if len(solns) == 0:
         print 'No solution found.'
+    elif len(solns) > 1:
+        print 'Not enough info.'
     else:
         for i in range (len(entities)):
-            print entities[i], ":", "Knight" if soln[i] else "Knave"
-            
-        
+            print entities[i], ":", "Knight" if solns[0][i] else "Knave"        
 
 if __name__ == '__main__':
     main()
