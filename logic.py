@@ -7,8 +7,9 @@ Created on Nov 12, 2012
 '''
 
 class ExistsStmt:
-    GT, LT, GTE, LTE, EQ = range(5)
+    GT, LT, NEQ, EQ, GTE, LTE = range(6)
     
+    # stmt = True means Knight, False means Knave, some Stmt means "would say this"
     def __init__(self, op, num, stmt = True, entities = None):
         self.op = op
         self.n = num
@@ -31,12 +32,14 @@ class ExistsStmt:
           ExistsStmt.LT: lambda n: count(assignment) < n,
           ExistsStmt.GTE: lambda n: count(assignment) >= n,
           ExistsStmt.LTE: lambda n: count(assignment) <= n,
-          ExistsStmt.EQ: lambda n: count(assignment) == n
+          ExistsStmt.EQ: lambda n: count(assignment) == n,
+          ExistsStmt.NEQ: lambda n: count(assignment) != n
         }
         return switch[self.op](self.n)
 
 class BinaryStmt:
     AND, OR, IF, EQ, XOR = range(5)
+    NEQ = XOR
     
     def __init__(self, left, op, right):
         self.l = left
@@ -73,6 +76,13 @@ class KnightStmt:
     def test(self, assignment):
         return assignment[self.i]
     
+class KnaveStmt:
+    def __init__(self, index):
+        self.i = index
+    
+    def test(self, assignment):
+        return not assignment[self.i]
+    
 def generateAssignments(num):
     if num == 1:
         return [[True], [False]]
@@ -96,13 +106,34 @@ def findSolutions(entityList, statementDict):
             solns.append(assn)
     return solns
 
+# Solving:
+# You meet nine inhabitants: Dave, Homer, Carl, Sue, Rex, Mel, Zoey, Zippy and Zeke.
+# Dave says that neither Rex nor Sue are knights. 
+# Homer tells you, 'Mel is a knave and I am a knight.' 
+# Carl says, 'Neither Zippy nor Zeke are knaves.' 
+# Sue tells you that it's false that Carl is a knave. 
+# Rex claims, 'Zippy and I are the same.' 
+# Mel tells you that Sue and Carl are both knights or both knaves. 
+# Zoey claims that Sue is a knave. 
+# Zippy tells you, 'Of Sue and Dave, exactly one is a knight.' 
+# Zeke claims that either Zippy is a knave or Mel is a knave.
 def main():
-    entities = ['Alice', 'Bob', 'Chad']
-    stmts = {0 : ExistsStmt(ExistsStmt.EQ, 1, KnightStmt(0), [0, 1, 2]),
-             1 : UnaryStmt(UnaryStmt.NOT, KnightStmt(2)),
-             2 : BinaryStmt(KnightStmt(0), 
-                            BinaryStmt.AND,
-                            KnightStmt(1))}
+    #            0       1        2       3      4      5      6       7        8
+    entities = ['Dave', 'Homer', 'Carl', 'Sue', 'Rex', 'Mel', 'Zoey', 'Zippy', 'Zeke']
+    stmts = {0: UnaryStmt(UnaryStmt.NOT, 
+                          BinaryStmt(KnightStmt(4), BinaryStmt.OR, KnightStmt(3))),
+             1: BinaryStmt(KnaveStmt(5), 
+                           BinaryStmt.AND,
+                           KnightStmt(1)),
+             2: UnaryStmt(UnaryStmt.NOT, 
+                          BinaryStmt(KnaveStmt(7), BinaryStmt.OR, KnaveStmt(8))),
+             3: UnaryStmt(UnaryStmt.NOT, KnaveStmt(2)),
+             4: BinaryStmt(KnightStmt(7), BinaryStmt.EQ, KnightStmt(4)),
+             5: BinaryStmt(KnightStmt(2), BinaryStmt.EQ, KnightStmt(3)),
+             6: KnaveStmt(3),
+             7: ExistsStmt(ExistsStmt.EQ, 1, True, [3, 0]),
+             8: BinaryStmt(KnaveStmt(7), BinaryStmt.OR, KnaveStmt(5))
+             }
     solns = findSolutions(entities, stmts)
     if len(solns) == 0:
         print 'No solution found.'
