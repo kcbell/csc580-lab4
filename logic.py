@@ -7,7 +7,7 @@ Created on Nov 12, 2012
 '''
 
 class ExistsStmt:
-    GT, LT, NEQ, EQ, GTE, LTE = range(6)
+    EQ, NEQ, GT, LT, GTE, LTE = range(6)
     
     # stmt = True means Knight, False means Knave, some Stmt means "would say this"
     def __init__(self, op, num, stmt = True, entities = None):
@@ -38,7 +38,7 @@ class ExistsStmt:
         return switch[self.op](self.n)
 
 class BinaryStmt:
-    AND, OR, IF, EQ, XOR = range(5)
+    EQ, AND, OR, IF, XOR = range(5)
     NEQ = XOR
     
     def __init__(self, left, op, right):
