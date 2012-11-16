@@ -1,0 +1,4 @@
+A very special island is inhabited only by knights and knaves. 
+Knights always tell the truth, and knaves always lie. 
+You meet two inhabitants: Zed and Peggy.  Zed says that Peggy is a knave.  Peggy tells you, 'Either Zed is a knight or I am a knight.'  
+Can you determine who is a knight and who is a knave?

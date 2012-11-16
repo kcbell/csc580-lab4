@@ -1,11 +1,11 @@
 '''
 Pulls the knights and knaves puzzles from http://philosophy.hku.hk/think/logic/knight.php
 
-Created on Nov 9, 2012
+Created on Nov 15, 2012
 
-@author: Karl
+@author: Toshi
 '''
-import re, nltk, string, urllib
+import re, nltk, string, urllib, os
 
 from nltk.corpus import brown
 from nltk.chunk import RegexpParser
@@ -14,31 +14,61 @@ from nltk.chunk import RegexpParser
 URL = "http://philosophy.hku.hk/think/logic/knight.php"
 PARAM = "qno=%d"
 NUM_PUZZLES = 25
-PATTERN = ".*<entry>([^<]*)</p>.*"
 
 def getPuzzle(html):
-    match = re.match(PATTERN, html, re.DOTALL)
-    return match.group(1).strip().replace("`", "'")
+    strPuzzle = ""
+    title = "<title>Knights and Knaves</title>"
+    bigTag = "<p>"
+    endTag = "</p>"
+    entTag = "<entry>"
+    numParas = 0
+    idx = html.find(title)
+    if idx > -1:
+        html = html[idx+len(title):]
+    while numParas < 3 and len(html) > 0:
+        idx1 = html.find(bigTag)
+        if idx1 < 0:
+            break
+        if numParas == 1:
+            idx1 = html.find(entTag) + len(entTag)
+        else:
+            idx1 = idx1 + len(bigTag)
+        idx2 = html.find(endTag)
+        if idx2 < 0:
+            break
+        strPuzzle += html[idx1:idx2]
+        html = html[idx2 + len(endTag):]
+        numParas += 1
+
+    return strPuzzle.strip().replace("`", "'")
+
+def getSecondPara(puz):
+    paras = []
+    
 
 def parsePuz(puz):
     myDict = {}
+    entities = []
+    #para = getSecondPara(puz)
     sents = nltk.sent_tokenize(puz)
     #print sents
-    count = 1
+    #count = 1
     for sent in sents:
-        if count == 1:
+        if len(entities) == 0:
             entities = getEntities(sent)
         else:
             tup = parseSent(entities, sent)
             if tup[0] != None:
                 myDict[tup[0]] = tup[1]
-                
-        count += 1
+
+            if len(myDict.keys()) == len(entities):
+                break
+                      
+        #count += 1
         
    
     return entities, myDict
     
-
 
 def getEntities(sent):
     entities = []
@@ -48,7 +78,7 @@ def getEntities(sent):
     NP = [w for (w,t) in tagged if t == "NN" or t == "NP"]
     #print NP
     for w in NP:
-        if w != "You":
+        if w.lower() != "knights" and w.lower() != "knaves":
             match = re.match("(^[A-Z]\w*).?", w)
             if match != None:
                 entities.append(match.group(1))
@@ -108,16 +138,41 @@ def clean(sent):
             idx += 1
     #print "None:" + sent
     return None
-                        
+
+def openFile(f):
+    input_file = open(f,'r')
+    puz = input_file.read()
+    input_file.close()
+    return puz
             
 def main():
-    for i in xrange(1, NUM_PUZZLES):
-        puz = getPuzzle(urllib.urlopen(URL, PARAM % i).read())
-        print puz
-        #puz = "You meet two inhabitants: Zoey and Mel.  Zoey tells you that Mel is a knave.  Mel says, 'Neither Zoey nor I are knaves.'"
-        (entities, puzDict) = parsePuz(puz)
-        print entities, puzDict
-        #call Jake's Function(entities, puzDict)
+    source = raw_input(' Please specify the source {w(web)|f(file)|t(type)}: ')
+    if source == "f":
+        f = raw_input(' Please specify the file: ')
+        if len(f) > 0:
+            puz = openFile(f)
+            print puz
+            (entities, puzDict) = parsePuz(puz)
+            print entities, puzDict
+            #call Jake's Function(entities, puzDict)
+    elif source == "t":
+        puz = raw_input(' Please type the puzzle(no newline char): ')
+        if len(puz) > 0:
+            print puz
+            (entities, puzDict) = parsePuz(puz)
+            print entities, puzDict
+            #call Jake's Function(entities, puzDict)
+    else:
+        for i in xrange(1, NUM_PUZZLES):
+            puz = getPuzzle(urllib.urlopen(URL, PARAM % i).read())
+            if len(puz) == 0:
+                print "Error: No puzzle was read!"
+                break
+            print puz
+            #puz = "You meet two inhabitants: Zoey and Mel.  Zoey tells you that Mel is a knave.  Mel says, 'Neither Zoey nor I are knaves.'"
+            (entities, puzDict) = parsePuz(puz)
+            print entities, puzDict
+            #call Jake's Function(entities, puzDict)
 
 if __name__ == '__main__':
     main()
