@@ -146,33 +146,39 @@ def openFile(f):
     return puz
             
 def main():
-    source = raw_input(' Please specify the source {w(web)|f(file)|t(type)}: ')
-    if source == "f":
-        f = raw_input(' Please specify the file: ')
-        if len(f) > 0:
-            puz = openFile(f)
-            print puz
-            (entities, puzDict) = parsePuz(puz)
-            print entities, puzDict
-            #call Jake's Function(entities, puzDict)
-    elif source == "t":
-        puz = raw_input(' Please type the puzzle(no newline char): ')
-        if len(puz) > 0:
-            print puz
-            (entities, puzDict) = parsePuz(puz)
-            print entities, puzDict
-            #call Jake's Function(entities, puzDict)
-    else:
-        for i in xrange(1, NUM_PUZZLES):
-            puz = getPuzzle(urllib.urlopen(URL, PARAM % i).read())
-            if len(puz) == 0:
-                print "Error: No puzzle was read!"
-                break
-            print puz
-            #puz = "You meet two inhabitants: Zoey and Mel.  Zoey tells you that Mel is a knave.  Mel says, 'Neither Zoey nor I are knaves.'"
-            (entities, puzDict) = parsePuz(puz)
-            print entities, puzDict
-            #call Jake's Function(entities, puzDict)
+    while True:
+        source = raw_input('\n Please specify the source {w(web)|f(file)|t(type)}: ')
+        if source == "f":
+            f = raw_input(' Please specify the file: ')
+            if len(f) > 0:
+                puz = openFile(f)
+                print puz
+                (entities, puzDict) = parsePuz(puz)
+                print entities, puzDict
+                #call Jake's Function(entities, puzDict)
+        elif source == "t":
+            puz = raw_input(' Please type the puzzle(no newline char please): ')
+            if len(puz) > 0:
+                print puz
+                (entities, puzDict) = parsePuz(puz)
+                print entities, puzDict
+                #call Jake's Function(entities, puzDict)
+        else:
+            for i in xrange(1, NUM_PUZZLES):
+                puz = getPuzzle(urllib.urlopen(URL, PARAM % i).read())
+                if len(puz) == 0:
+                    print "Error: No puzzle was read!"
+                    break
+                print puz
+                #puz = "You meet two inhabitants: Zoey and Mel.  Zoey tells you that Mel is a knave.  Mel says, 'Neither Zoey nor I are knaves.'"
+                (entities, puzDict) = parsePuz(puz)
+                print entities, puzDict
+                #call Jake's Function(entities, puzDict)
+            break # break from while loop
+
+        val = raw_input('\n Do you want to solve another puzzle? {y|n}: ')
+        if val == "n":
+            break #break from while loop
 
 if __name__ == '__main__':
     main()
