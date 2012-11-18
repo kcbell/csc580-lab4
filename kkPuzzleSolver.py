@@ -5,7 +5,7 @@ Created on Nov 15, 2012
 
 @author: Toshi
 '''
-import re, nltk, string, urllib, os
+import re, nltk, string, urllib, os, converter, logic
 
 from nltk.corpus import brown
 from nltk.chunk import RegexpParser
@@ -144,7 +144,17 @@ def openFile(f):
     puz = input_file.read()
     input_file.close()
     return puz
-            
+
+def solvePuz(entities, stmts):
+    solns = logic.findSolutions(entities, stmts)
+    if len(solns) == 0:
+        print 'No solution found.'
+    elif len(solns) > 1:
+        print 'Not enough info.'
+    else:
+        for i in range (len(entities)):
+            print entities[i], ":", "Knight" if solns[0][i] else "Knave"        
+
 def main():
     while True:
         source = raw_input('\n Please specify the source {w(web)|f(file)|t(type)}: ')
@@ -156,6 +166,9 @@ def main():
                 (entities, puzDict) = parsePuz(puz)
                 print entities, puzDict
                 #call Jake's Function(entities, puzDict)
+                logicStmts = converter.convertToLogic(entities, puzDict)
+                print logicStmts
+                solvePuz(entities, logicStmts)
         elif source == "t":
             puz = raw_input(' Please type the puzzle(no newline char please): ')
             if len(puz) > 0:
@@ -163,6 +176,9 @@ def main():
                 (entities, puzDict) = parsePuz(puz)
                 print entities, puzDict
                 #call Jake's Function(entities, puzDict)
+                logicStmts = converter.convertToLogic(entities, puzDict)
+                print logicStmts
+                solvePuz(entities, logicStmts)
         else:
             for i in xrange(1, NUM_PUZZLES):
                 puz = getPuzzle(urllib.urlopen(URL, PARAM % i).read())
@@ -174,6 +190,9 @@ def main():
                 (entities, puzDict) = parsePuz(puz)
                 print entities, puzDict
                 #call Jake's Function(entities, puzDict)
+                logicStmts = converter.convertToLogic(entities, puzDict)
+                print logicStmts
+                solvePuz(entities, logicStmts)
             break # break from while loop
 
         val = raw_input('\n Do you want to solve another puzzle? {y|n}: ')
