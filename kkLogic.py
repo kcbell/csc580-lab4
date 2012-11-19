@@ -16,6 +16,17 @@ class ExistsStmt:
         self.stmt = stmt
         self.ents = entities
         
+    def __str__(self):
+        switch = {
+          ExistsStmt.GT: ">",
+          ExistsStmt.LT: "<",
+          ExistsStmt.GTE: ">=",
+          ExistsStmt.LTE: "<=",
+          ExistsStmt.EQ: "==",
+          ExistsStmt.NEQ: "!="
+        }
+        return "Exists %s %d %s in %s" % (switch[self.op], self.n, str(self.stmt), str(self.ents))
+        
     def test(self, assignment):
         def count(assn):
             count = 0
@@ -45,6 +56,16 @@ class BinaryStmt:
         self.l = left
         self.op = op
         self.r = right
+        
+    def __str__(self):
+        switch = {
+          BinaryStmt.AND: "&&",
+          BinaryStmt.OR: "||",
+          BinaryStmt.IF: "IF",
+          BinaryStmt.EQ: "==",
+          BinaryStmt.XOR: "!="
+        }
+        return "%s %s %s" % (str(self.l), switch[self.op], str(self.r))
     
     def test(self, assignment):
         switch = {
@@ -63,6 +84,12 @@ class UnaryStmt:
         self.op = op
         self.s = stmt;
         
+    def __str__(self):
+        switch = {
+          UnaryStmt.NOT: "!"
+        }
+        return "%s%s" % (switch[self.op], str(self.s))
+        
     def test(self, assignment):
         switch = {
           UnaryStmt.NOT: lambda x: not x.test(assignment)
@@ -73,12 +100,18 @@ class KnightStmt:
     def __init__(self, index):
         self.i = index
     
+    def __str__(self):
+        return "Knight(%d)" % self.i
+    
     def test(self, assignment):
         return assignment[self.i]
     
 class KnaveStmt:
     def __init__(self, index):
         self.i = index
+        
+    def __str__(self):
+        return "Knave(%d)" % self.i
     
     def test(self, assignment):
         return not assignment[self.i]
@@ -141,7 +174,7 @@ def main():
         print 'Not enough info.'
     else:
         for i in range (len(entities)):
-            print entities[i], ":", "Knight" if solns[0][i] else "Knave"        
+            print entities[i], ":", "Knight" if solns[0][i] else "Knave"
 
 if __name__ == '__main__':
     main()
