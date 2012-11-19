@@ -13,7 +13,7 @@ from nltk.chunk import RegexpParser
 
 URL = "http://philosophy.hku.hk/think/logic/knight.php"
 PARAM = "qno=%d"
-NUM_PUZZLES = 25
+NUM_PUZZLES = 26
 
 def getPuzzle(html):
     strPuzzle = ""
