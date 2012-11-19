@@ -14,8 +14,7 @@ from kkLogic import BinaryStmt, ExistsStmt, UnaryStmt, KnightStmt, KnaveStmt
 def ks(ref, string):
     return KnightStmt(ref) if string == "knight" else KnaveStmt(ref)
 
-statements = 
-    [
+statements = [
     ('^(\d) and (\d) is both (knight|knave) or both (knight|knave)',
     lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.EQ, KnightStmt(int(x[1])))
     ),
