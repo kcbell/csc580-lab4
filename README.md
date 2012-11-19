@@ -1,5 +1,10 @@
 csc580-lab4
 ===========
+Karl Bell
+Toshihiro Kuboi
+Jake Muir
+===========
+
 kkSolver.py is the main program. Usage is:
 
 python kkSolver.py [-c] [FILENAME...]
