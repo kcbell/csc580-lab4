@@ -1,11 +1,12 @@
 '''
-Pulls the knights and knaves puzzles from http://philosophy.hku.hk/think/logic/knight.php
+Pulls the entities and statements out of a knights and knaves puzzle
 
 Created on Nov 15, 2012
 
 @author: Toshi
 '''
-import re, nltk, string, urllib, os
+
+import re, nltk
 
 from nltk.corpus import brown
 from nltk.chunk import RegexpParser
@@ -31,13 +32,11 @@ def getEntities(sent):
     tagger = getPOSTagger()
     tagged = tagger.tag(words)
     NP = [w for (w,t) in tagged if t == "NN" or t == "NP"]
-    #print NP
     for w in NP:
         if w.lower() != "knights" and w.lower() != "knaves":
             match = re.match("(^[A-Z]\w*).?", w)
             if match != None:
                 entities.append(match.group(1))
-    #print entities
     return entities
 
 def getPOSTagger():
@@ -69,14 +68,9 @@ def parseSent(entities, sent):
     for q in queries:
         match = re.match(q, sent, re.IGNORECASE)
         if match != None:
-            try:
-                idx = entities.index(match.group(1))
-                statement = match.group(2)
-                #print entity, idx, statement
-                break
-            except:
-                print "error"
-                break
+            idx = entities.index(match.group(1))
+            statement = match.group(2)
+            break
 
     return (idx, statement)
 
@@ -87,7 +81,6 @@ def clean(sent):
             return sent[idx:]
         else:
             idx += 1
-    #print "None:" + sent
     return None
 
 def main():
@@ -99,7 +92,6 @@ def main():
                 print entity, ":", val 
     except EOFError:
         print
-        
 
 if __name__ == '__main__':
     main()

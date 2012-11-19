@@ -1,7 +1,7 @@
 '''
-Converts statements in plain text to statments in kkLogic
+Converts statements in plain text to statements in kkLogic
 
-Created on Nov 9, 2012
+Created on Nov 18, 2012
 
 @author: Karl
 '''
@@ -14,38 +14,39 @@ from kkLogic import BinaryStmt, ExistsStmt, UnaryStmt, KnightStmt, KnaveStmt
 def ks(ref, string):
     return KnightStmt(ref) if string == "knight" else KnaveStmt(ref)
 
-statements = [
-('^(\d) and (\d) is both (knight|knave) or both (knight|knave)',
-lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.EQ, KnightStmt(int(x[1])))
-),
-('^(\d) is (knight|knave) or (\d) is (knight|knave)', 
-lambda x: BinaryStmt(ks(int(x[0]), x[1]), BinaryStmt.OR, ks(int(x[2]), x[3]))
-),
-('^(\d) and (\d) is (knight|knave)', 
-lambda x: BinaryStmt(ks(int(x[0]), x[2]), BinaryStmt.AND, ks(int(x[1]), x[2]))
-),
-('^(\d) and (\d) is the same', 
-lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.EQ, KnightStmt(int(x[1])))
-),
-('^(\d) and (\d) is both (knight|knave)', 
-lambda x: BinaryStmt(ks(int(x[0]), x[2]), BinaryStmt.AND, ks(int(x[1]), x[2]))
-),
-('^(\d) and (\d) is different', 
-lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.NEQ, KnightStmt(int(x[1])))
-),
-('^(\d) is (knight|knave) and (\d) is (knight|knave)', 
-lambda x: BinaryStmt(ks(int(x[0]), x[1]), BinaryStmt.AND, ks(int(x[2]), x[3]))
-),
-('^of (\d) and (\d) exactly one is (knight|knave)', 
-lambda x: ExistsStmt(ExistsStmt.EQ, 1, x[2] == "knight", [int(x[0]), int(x[1])])
-),
-('^neither (\d) nor (\d) is (knight|knave)', 
-lambda x: BinaryStmt(UnaryStmt(UnaryStmt.NOT, ks(int(x[0]), x[2])), BinaryStmt.AND, UnaryStmt(UnaryStmt.NOT, ks(int(x[1]), x[2])))
-),
-('^(\d) is (knight|knave)', 
-lambda x: ks(int(x[0]), x[1])
-)
-]
+statements = 
+    [
+    ('^(\d) and (\d) is both (knight|knave) or both (knight|knave)',
+    lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.EQ, KnightStmt(int(x[1])))
+    ),
+    ('^(\d) is (knight|knave) or (\d) is (knight|knave)',
+    lambda x: BinaryStmt(ks(int(x[0]), x[1]), BinaryStmt.OR, ks(int(x[2]), x[3]))
+    ),
+    ('^(\d) and (\d) is (knight|knave)',
+    lambda x: BinaryStmt(ks(int(x[0]), x[2]), BinaryStmt.AND, ks(int(x[1]), x[2]))
+    ),
+    ('^(\d) and (\d) is the same',
+    lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.EQ, KnightStmt(int(x[1])))
+    ),
+    ('^(\d) and (\d) is both (knight|knave)',
+    lambda x: BinaryStmt(ks(int(x[0]), x[2]), BinaryStmt.AND, ks(int(x[1]), x[2]))
+    ),
+    ('^(\d) and (\d) is different',
+    lambda x: BinaryStmt(KnightStmt(int(x[0])), BinaryStmt.NEQ, KnightStmt(int(x[1])))
+    ),
+    ('^(\d) is (knight|knave) and (\d) is (knight|knave)',
+    lambda x: BinaryStmt(ks(int(x[0]), x[1]), BinaryStmt.AND, ks(int(x[2]), x[3]))
+    ),
+    ('^of (\d) and (\d) exactly one is (knight|knave)',
+    lambda x: ExistsStmt(ExistsStmt.EQ, 1, x[2] == "knight", [int(x[0]), int(x[1])])
+    ),
+    ('^neither (\d) nor (\d) is (knight|knave)',
+    lambda x: BinaryStmt(UnaryStmt(UnaryStmt.NOT, ks(int(x[0]), x[2])), BinaryStmt.AND, UnaryStmt(UnaryStmt.NOT, ks(int(x[1]), x[2])))
+    ),
+    ('^(\d) is (knight|knave)',
+    lambda x: ks(int(x[0]), x[1])
+    )
+    ]
 
 def replaceEntities(entities, entity, statement):
     ret = statement.replace("1", "one").replace("2", "two") # more but they don't actually occur
@@ -63,8 +64,6 @@ def replaceRedundance(statement, entity):
     ret = ret.replace(".", "")
     ret = ret.replace("knights", "knight")
     ret = ret.replace("knaves", "knave")
-    #ret = ret.replace("knight", "kk")
-    #ret = ret.replace("knave", "kk")
     ret = re.sub("^%d know" % entity, "", ret)
     ret = re.sub("\s+(am|are|is)\s*", " is ", ret)
     ret = re.sub("\s*(am|are|is)\s+", " is ", ret)
@@ -96,9 +95,6 @@ def parseCleanStatement(entities, entity, stmt):
     for regex, fun in statements:
         m = re.match(regex, stmt)
         if (m != None):
-            #print stmt
-            #print regex
-            #print m.groups()
             return fun(m.groups())
     raise ValueError(stmt)
 
