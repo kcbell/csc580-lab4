@@ -10,6 +10,12 @@ from kkPuzzleParser import parsePuz
 from kkStatementParser import parseStatements
 from kkLogic import findSolutions
 
+def getSolns(puz):
+    entities, puzDict = parsePuz(puz.strip().replace("`", "'"))
+    logicDict = parseStatements(entities, puzDict)
+    solns = findSolutions(entities, logicDict)
+    return (entities, solns)
+
 def main():
     args = sys.argv
     files = []
@@ -26,9 +32,7 @@ def main():
             files.extend([open(arg, "r").read() for arg in args[1:]])
     
     for f in files:
-        entities, puzDict = parsePuz(f.strip().replace("`", "'"))
-        logicDict = parseStatements(entities, puzDict)
-        solns = findSolutions(entities, logicDict)
+        entities, solns = getSolns(f)
         if len(solns) == 0:
             print 'No solution.'
         elif len(solns) > 1:
